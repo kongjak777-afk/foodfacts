@@ -102,6 +102,15 @@
             </span>
         </div>
         <div th:text="${c.content}" style="margin-top: 4px;">내용</div>
+        <div sec:authorize="isAuthenticated()"
+             th:if="${c.author.username == #authentication.name}"
+             style="margin-top: 6px;">
+            <form th:action="@{/products/{code}/comments/{commentId}/delete(code=${product.code}, commentId=${c.id}, lang=${lang})}"
+                  method="post" style="display:inline;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" onclick="return confirm('정말 삭제할까요?');">삭제</button>
+            </form>
+        </div>
     </li>
 </ul>
 

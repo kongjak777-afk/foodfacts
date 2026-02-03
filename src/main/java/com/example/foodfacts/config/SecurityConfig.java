@@ -42,8 +42,9 @@ public class SecurityConfig {
                         // 제품/홈 조회는 누구나 가능
                         .requestMatchers(HttpMethod.GET, "/", "/products/**").permitAll()
 
-                        // 댓글 작성(POST)은 로그인 필요
-                        .requestMatchers(HttpMethod.POST, "/products/**/comments").authenticated()
+                        // /products/{code}/comments, /products/{code}/comments/{id}/delete 모두 커버됩니다.
+                        .requestMatchers(HttpMethod.POST, "/products/*/comments/**").authenticated()
+
 
                         // 나머지는 기본적으로 인증 필요(보수적으로)
                         .anyRequest().authenticated()

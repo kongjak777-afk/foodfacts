@@ -43,4 +43,31 @@ public class CommentController {
 
         return "redirect:/products/" + code + "?lang=" + lang;
     }
+
+
+    /**
+     * 댓글 삭제 (POST 방식)
+     *
+     * URL 예:
+     *  POST /products/3017620422003/comments/10/delete?lang=ko
+     */
+    @PostMapping("/{code}/comments/{commentId}/delete")
+    public String deleteComment(
+            @PathVariable String code,
+            @PathVariable Long commentId,
+            @RequestParam(name = "lang", required = false, defaultValue = "ko") String lang,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+
+        // 서비스에서 "본인 여부"를 최종 검증
+        try {
+            commentService.deleteComment(code, commentId, username);
+        } catch (IllegalArgumentException e) {
+            // 초보 단계에서는 간단히 무시하고 redirect
+            // (추후: 에러 메시지를 상세 페이지에 표시하도록 개선 가능)
+        }
+
+        return "redirect:/products/" + code + "?lang=" + lang;
+    }
 }
