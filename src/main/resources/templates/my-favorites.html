@@ -7,20 +7,43 @@
 <body>
 
 <h1>내 즐겨찾기</h1>
-<p><a href="/">← 홈</a></p>
+
+<p>
+    <a href="/">← 홈</a>
+    <span style="margin-left: 10px;">
+        <strong>언어:</strong>
+        <a th:href="@{/me/favorites(lang='ko')}">한국어</a> |
+        <a th:href="@{/me/favorites(lang='en')}">English</a>
+    </span>
+</p>
+
+<hr/>
 
 <div th:if="${#lists.isEmpty(favorites)}">
     <p>즐겨찾기한 제품이 없습니다.</p>
 </div>
 
-<ul th:if="${!#lists.isEmpty(favorites)}">
-    <li th:each="f : ${favorites}">
-        <a th:href="@{/products/{code}(code=${f.productCode}, lang='ko')}"
-           th:text="${f.productCode}">productCode</a>
-        <span style="color:#666;"
-              th:text="${#temporals.format(f.createdAt, 'yyyy-MM-dd HH:mm')}">date</span>
-    </li>
-</ul>
+<div th:if="${!#lists.isEmpty(favorites)}">
+    <div th:each="f : ${favorites}" style="padding: 10px 0; border-bottom: 1px solid #ddd;">
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+            <div th:if="${f.imageUrl != null}">
+                <img th:src="${f.imageUrl}" alt="img" style="width:80px; height:auto;"/>
+            </div>
+
+            <div>
+                <div style="font-size: 16px;">
+                    <a th:href="@{/products/{code}(code=${f.productCode}, lang=${lang})}"
+                       th:text="${f.displayName}">제품명</a>
+                </div>
+
+                <div style="color:#666; margin-top:4px;">
+                    code: <span th:text="${f.productCode}">code</span>
+                    · 즐겨찾기: <span th:text="${f.createdAtText}">date</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

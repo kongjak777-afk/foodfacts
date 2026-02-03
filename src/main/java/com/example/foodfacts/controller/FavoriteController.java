@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 즐겨찾기 컨트롤러
@@ -44,9 +45,14 @@ public class FavoriteController {
 
     // 내 즐겨찾기 목록
     @GetMapping("/me/favorites")
-    public String myFavorites(Authentication authentication, Model model) {
-        var list = favoriteService.list(authentication.getName());
-        model.addAttribute("favorites", list);
+    public String myFavorites(
+            Authentication authentication,
+            @RequestParam(name = "lang", required = false, defaultValue = "ko") String lang,
+            Model model
+    ) {
+        var listView = favoriteService.listView(authentication.getName(), lang);
+        model.addAttribute("favorites", listView);
+        model.addAttribute("lang", lang);
         return "my-favorites";
     }
 }
