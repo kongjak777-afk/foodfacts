@@ -101,6 +101,13 @@
                 날짜
             </span>
         </div>
+        <div sec:authorize="isAuthenticated()"
+             th:if="${c.author.username == #authentication.name}"
+             style="margin-top: 6px;">
+            <a th:href="@{/products/{code}/comments/{commentId}/edit(code=${product.code}, commentId=${c.id}, lang=${lang})}">
+                수정
+            </a>
+        </div>
         <div th:text="${c.content}" style="margin-top: 4px;">내용</div>
         <div sec:authorize="isAuthenticated()"
              th:if="${c.author.username == #authentication.name}"

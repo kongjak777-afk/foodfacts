@@ -49,4 +49,12 @@ public class Comment {
     public UserAccount getAuthor() { return author; }
     public String getContent() { return content; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    /**
+     * setter 대신 "의미가 있는 메서드"로 엔티티 상태를 변경하는 방식.
+     * 유지보수/검증에 유리합니다.
+     */
+    public void changeContent(String newContent) {
+        this.content = newContent;
+    }
 }

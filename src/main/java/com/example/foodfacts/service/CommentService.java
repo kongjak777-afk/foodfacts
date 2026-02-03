@@ -65,5 +65,47 @@ public class CommentService {
         // 4) 삭제
         commentRepo.delete(comment);
     }
+    // ===========================
+    // ===== [추가] 시작: 수정 =====
+    // ===========================
+    /**
+     * 댓글 수정 (본인만 가능)
+     */
+    @Transactional
+    public void updateComment(String productCode, Long commentId, String username, String newContent) {
+
+        Comment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+
+        // 안전장치: URL의 제품코드와 댓글의 제품코드가 일치해야 함
+        if (!comment.getProductCode().equals(productCode)) {
+            throw new IllegalArgumentException("잘못된 접근입니다(제품 코드 불일치).");
+        }
+
+        // 본인 검증
+        if (!comment.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("본인 댓글만 수정할 수 있습니다.");
+        }
+
+        // 내용 변경 (엔티티에 setter를 두지 않고, 전용 메서드로 변경하는 패턴)
+        comment.changeContent(newContent);
+    }
+    @Transactional(readOnly = true)
+    public Comment getCommentForEdit(String productCode, Long commentId, String username) {
+        Comment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+
+        if (!comment.getProductCode().equals(productCode)) {
+            throw new IllegalArgumentException("잘못된 접근입니다(제품 코드 불일치).");
+        }
+
+        if (!comment.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("본인 댓글만 수정할 수 있습니다.");
+        }
+
+        return comment;
+    }
+
+
 
 }

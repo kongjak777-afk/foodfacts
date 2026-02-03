@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>댓글 수정</title>
+</head>
+<body>
+
+<h1>댓글 수정</h1>
+
+<form th:action="@{/products/{code}/comments/{commentId}/edit(code=${productCode}, commentId=${commentId}, lang=${lang})}"
+      th:object="${updateForm}"
+      method="post">
+
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <div>
+        <textarea th:field="*{content}" rows="5" cols="70"></textarea>
+        <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" style="color:red;"></div>
+    </div>
+
+    <div th:if="${#fields.hasGlobalErrors()}" style="color:red;" th:each="e : ${#fields.globalErrors()}" th:text="${e}">
+        에러
+    </div>
+
+    <button type="submit">수정 저장</button>
+    <a th:href="@{/products/{code}(code=${productCode}, lang=${lang})}">취소</a>
+</form>
+
+</body>
+</html>
