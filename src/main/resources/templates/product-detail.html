@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${displayName}">Product Detail</title>
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div style="margin-bottom: 12px;">
+    <a href="/">← 홈으로</a>
+
+    <!-- 로그인/로그아웃 UI -->
+    <span style="margin-left: 12px;">
+        <!-- 로그인 상태면 사용자명 + 로그아웃 버튼 -->
+        <span sec:authorize="isAuthenticated()">
+            <strong th:text="${#authentication.name}">username</strong> 님 |
+            <form method="post" action="/logout" style="display:inline;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit">로그아웃</button>
+            </form>
+        </span>
+
+        <!-- 비로그인 상태면 로그인/회원가입 -->
+        <span sec:authorize="isAnonymous()">
+            <a href="/login">로그인</a> |
+            <a href="/auth/register">회원가입</a>
+        </span>
+    </span>
+</div>
+
+<hr/>
+
+<!-- 제품 기본 정보 -->
+<h1 th:text="${displayName}">제품명</h1>
+
+<div th:if="${product.imageUrl != null}" style="margin: 12px 0;">
+    <img th:src="${product.imageUrl}" alt="product image" style="max-width: 240px;"/>
+</div>
+
+<p>
+    <strong>브랜드:</strong>
+    <span th:text="${product.brands} ?: '(브랜드 정보 없음)'"></span>
+</p>
+
+<p>
+    <strong>Nutri-Score:</strong>
+    <span th:text="${product.nutriScoreGrade} ?: '-'"></span>
+</p>
+
+<!-- 언어 전환: 같은 code로 lang만 바꿔서 재요청 -->
+<p style="margin-top: 8px;">
+    <strong>언어:</strong>
+    <a th:href="@{/products/{code}(code=${product.code}, lang='ko')}">한국어</a> |
+    <a th:href="@{/products/{code}(code=${product.code}, lang='en')}">English</a>
+</p>
+
+<hr/>
+
+<!-- 성분 -->
+<h2>성분</h2>
+<p th:text="${displayIngredients}">성분 텍스트</p>
+
+<hr/>
+
+<!-- 영양 (일부) -->
+<h2>영양 (일부)</h2>
+<ul>
+    <!-- nutriments는 Map이므로 key로 꺼냅니다. 없는 경우 null -->
+    <li>에너지(kcal/100g):
+        <span th:text="${product.nutriments != null ? product.nutriments['energy-kcal_100g'] : null} ?: '-'"></span>
+    </li>
+    <li>당류(sugars/100g):
+        <span th:text="${product.nutriments != null ? product.nutriments['sugars_100g'] : null} ?: '-'"></span>
+    </li>
+    <li>지방(fat/100g):
+        <span th:text="${product.nutriments != null ? product.nutriments['fat_100g'] : null} ?: '-'"></span>
+    </li>
+    <li>소금(salt/100g):
+        <span th:text="${product.nutriments != null ? product.nutriments['salt_100g'] : null} ?: '-'"></span>
+    </li>
+</ul>
+
+<hr/>
+
+<!-- 댓글 섹션 -->
+<h2>댓글</h2>
+
+<!-- 댓글 목록 -->
+<div th:if="${#lists.isEmpty(comments)}">
+    <p>아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</p>
+</div>
+
+<ul th:if="${!#lists.isEmpty(comments)}">
+    <li th:each="c : ${comments}" style="margin-bottom: 10px;">
+        <div>
+            <strong th:text="${c.author.username}">작성자</strong>
+            <span style="margin-left: 8px; color: #666;"
+                  th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">
+                날짜
+            </span>
+        </div>
+        <div th:text="${c.content}" style="margin-top: 4px;">내용</div>
+    </li>
+</ul>
+
+<hr/>
+
+<!-- 댓글 작성 폼: 로그인한 사용자만 보이게 -->
+<div sec:authorize="isAuthenticated()">
+    <h3>댓글 작성</h3>
+
+    <form th:action="@{/products/{code}/comments(code=${product.code}, lang=${lang})}"
+          th:object="${commentForm}" method="post">
+
+        <!-- CSRF 토큰 필수 -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <textarea th:field="*{content}"
+                  rows="3"
+                  cols="70"
+                  placeholder="의견을 남겨보세요 (최대 500자)"></textarea>
+
+        <!-- 검증 에러 표시(추후 개선 가능) -->
+        <div th:if="${#fields.hasErrors('content')}"
+             th:errors="*{content}"
+             style="color:red; margin-top: 4px;"></div>
+
+        <div style="margin-top: 8px;">
+            <button type="submit">등록</button>
+        </div>
+    </form>
+</div>
+
+<!-- 비로그인 사용자 안내 -->
+<div sec:authorize="isAnonymous()">
+    <p>댓글을 작성하려면 <a href="/login">로그인</a>이 필요합니다.</p>
+</div>
+
+</body>
+</html>

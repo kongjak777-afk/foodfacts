@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Food Facts</title>
+</head>
+<body>
+<h1>🍎 Open Food Facts - 카테고리 검색</h1>
+
+<!-- 검색 폼: GET 방식으로 /?category=... 형태로 요청 -->
+<form method="get" action="/">
+    <label>
+        Category (English):
+        <input type="text" name="category" th:value="${category}" placeholder="e.g. Orange Juice"/>
+    </label>
+    <button type="submit">Search</button>
+</form>
+
+<hr/>
+
+<h2 th:text="'Results for: ' + ${category}"></h2>
+
+<!-- products가 비어있으면 안내 문구 -->
+<div th:if="${#lists.isEmpty(products)}">
+    <p>검색 결과가 없습니다. 다른 카테고리를 입력해 보세요.</p>
+</div>
+
+<!-- products가 있으면 반복 출력 -->
+<ul th:if="${!#lists.isEmpty(products)}">
+    <li th:each="p : ${products}">
+        <a th:href="@{/products/{code}(code=${p.code}, lang='ko')}">
+            <strong th:text="${p.productName}">Product Name</strong>
+        </a>
+
+        <span th:text="' | Brand: ' + ${p.brands}">Brand</span>
+        <span th:text="' | NutriScore: ' + ${p.nutriScoreGrade}">NutriScore</span>
+        <span th:text="' | Code: ' + ${p.code}">Code</span>
+    </li>
+</ul>
+
+</body>
+</html>
