@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 즐겨찾기</title>
+</head>
+<body>
+
+<h1>내 즐겨찾기</h1>
+<p><a href="/">← 홈</a></p>
+
+<div th:if="${#lists.isEmpty(favorites)}">
+    <p>즐겨찾기한 제품이 없습니다.</p>
+</div>
+
+<ul th:if="${!#lists.isEmpty(favorites)}">
+    <li th:each="f : ${favorites}">
+        <a th:href="@{/products/{code}(code=${f.productCode}, lang='ko')}"
+           th:text="${f.productCode}">productCode</a>
+        <span style="color:#666;"
+              th:text="${#temporals.format(f.createdAt, 'yyyy-MM-dd HH:mm')}">date</span>
+    </li>
+</ul>
+
+</body>
+</html>

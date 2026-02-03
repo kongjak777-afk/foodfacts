@@ -10,11 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * 아주 단순한 폼 로그인 기반 보안 설정
- * - 조회: 누구나 가능
- * - 댓글 작성(POST): 로그인 필요
+ * Security 설정
  *
- * 주의: 연습 프로젝트이므로 최소 설정만 적용합니다.
+ * 핵심 규칙:
+ * - requestMatchers(...) 들을 먼저 쭉 나열
+ * - anyRequest()는 반드시 "마지막"에 둔다 (중요!)
  */
 @Configuration
 public class SecurityConfig {
@@ -29,28 +29,52 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // CSRF는 기본 ON. (타임리프 폼에 토큰 넣으면 문제 없음)
                 .csrf(Customizer.withDefaults())
 
                 .authorizeHttpRequests(auth -> auth
-                        // 정적 리소스가 있다면 허용 (추후 css/js 쓰면 필요)
+
+                        // =========================
+                        // 1) 누구나 접근 허용
+                        // =========================
+
+                        // 정적 리소스
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
-                        // 회원가입/로그인 페이지는 누구나 접근 가능
+                        // 회원가입/로그인
                         .requestMatchers("/auth/**", "/login").permitAll()
 
-                        // 제품/홈 조회는 누구나 가능
+                        // 홈 + 제품 조회는 누구나
                         .requestMatchers(HttpMethod.GET, "/", "/products/**").permitAll()
 
-                        // /products/{code}/comments, /products/{code}/comments/{id}/delete 모두 커버됩니다.
+                        // =========================
+                        // 2) 로그인 필요
+                        // =========================
+
+                        // 댓글 작성/삭제/수정 POST들
+                        // - /products/{code}/comments
+                        // - /products/{code}/comments/{id}/delete
+                        // - /products/{code}/comments/{id}/edit (POST)
                         .requestMatchers(HttpMethod.POST, "/products/*/comments/**").authenticated()
 
+                        // 댓글 수정 화면(GET)은 /products/** permitAll에 걸리지만
+                        // 서비스에서 본인 검증을 하므로 실질적으로 막힙니다.
+                        // 더 엄격히 하고 싶으면 아래를 permitAll 위로 빼서 authenticated로 걸어도 됩니다.
+                        // .requestMatchers(HttpMethod.GET, "/products/*/comments/*/edit").authenticated()
 
-                        // 나머지는 기본적으로 인증 필요(보수적으로)
+                        // 즐겨찾기
+                        .requestMatchers(HttpMethod.POST, "/products/*/favorite").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/products/*/unfavorite").authenticated()
+
+                        // 마이페이지(즐겨찾기 목록)
+                        .requestMatchers("/me/**").authenticated()
+
+                        // =========================
+                        // 3) 그 외는 기본적으로 인증 요구 (반드시 마지막!)
+                        // =========================
                         .anyRequest().authenticated()
                 )
 
-                // 기본 폼 로그인 사용 (우리가 login.html 만들 예정)
+                // 커스텀 로그인 페이지
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
